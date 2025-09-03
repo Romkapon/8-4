@@ -1,0 +1,143 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f8ff;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+h2 {
+    color: #3498db;
+}
+
+h3 {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    margin-top: 30px;
+}
+
+#dateDisplay {
+    margin-bottom: 25px;
+    font-style: italic;
+    color: #7f8c8d;
+    font-size: 1.1em;
+}
+
+.today-duty {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    padding: 25px;
+    border-radius: 12px;
+    margin: 25px 0;
+    border: 2px solid #90caf9;
+}
+
+#todayDutyPair {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #1565c0;
+    margin: 15px 0;
+    line-height: 1.6;
+}
+
+.info {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #fff8e1;
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+}
+
+.info p {
+    margin: 0;
+    color: #ff6f00;
+    font-style: italic;
+}
+
+button {
+    padding: 12px 25px;
+    margin: 20px 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    background-color: #95a5a6;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.full-list {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    border: 1px solid #ddd;
+}
+
+ol {
+    text-align: left;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0;
+    list-style-position: inside;
+}
+
+li {
+    background-color: white;
+    margin: 8px 0;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pair-divider {
+    color: #e74c3c;
+    font-weight: bold;
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #ffebee;
+    border-radius: 5px;
+}
+
+.current-duty {
+    background-color: #e3f2fd !important;
+    font-weight: bold;
+    border-left: 4px solid #2196f3 !important;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+    
+    #todayDutyPair {
+        font-size: 1.2em;
+    }
+    
+    button {
+        padding: 10px 15px;
+        font-size: 0.9em;
+    }
+}
