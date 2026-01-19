@@ -34,110 +34,111 @@ const initialDutyList = [
 ];
 
 function getSchoolStartDate() {
-    const currentYear = new Date().getFullYear();
-    return new Date(currentYear, 8, 3);
+    const now = new Date();
+    let year = now.getFullYear();
+    // Если сентябрь ещё не наступил в этом году, используем прошлый год
+    if (now.getMonth() < 8 || (now.getMonth() === 8 && now.getDate() < 3)) {
+        year -= 1;
+    }
+    return new Date(year, 8, 3); // 3 сентября
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeDutySystem();
     displayDate();
 });
 
+function countSchoolDaysSinceStart(date) {
+    const startDate = getSchoolStartDate();
+    if (date < startDate) return 0;
+
+    let count = 0;
+    const current = new Date(startDate);
+
+    while (current <= date) {
+        const day = current.getDay();
+        // Учебные дни: понедельник (1) – суббота (6), воскресенье (0) — выходной
+        if (day !== 0) {
+            count++;
+        }
+        current.setDate(current.getDate() + 1);
+    }
+    return count;
+}
+
 function initializeDutySystem() {
     const today = new Date();
-    const schoolStartDate = getSchoolStartDate();
-    const schoolDaysPassed = countSchoolDaysSinceStart(today);
-    const currentIndex = ((schoolDaysPassed - 1) * 2) % initialDutyList.length;
-    const finalIndex = schoolDaysPassed >= 1 ? currentIndex : 0;
+    const schoolDays = countSchoolDaysSinceStart(today);
     
-    saveCurrentIndex(finalIndex);
+    // Каждая пара дежурит один день → индекс пары = schoolDays - 1
+    // Индекс первого дежурного = (schoolDays - 1) * 2
+    let startIndex = schoolDays > 0 ? ((schoolDays - 1) * 2) % initialDutyList.length : 0;
+
+    saveCurrentIndex(startIndex);
     saveDutyList([...initialDutyList]);
     displayCurrentDuty();
 }
 
-function countSchoolDaysSinceStart(date) {
-    const startDate = getSchoolStartDate();
-    if (date < startDate) {
-        return 0;
-    }
-    
-    let currentDate = new Date(startDate);
-    let schoolDaysCount = 0;
-    
-    while (currentDate <= date) {
-        if (currentDate.getDay() !== 0) {
-            schoolDaysCount++;
-        }
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    return schoolDaysCount;
-}
-
 function getCurrentDutyPair() {
-    const dutyList = getSavedDutyList();
-    const currentIndex = getCurrentIndex();
-    const firstIndex = currentIndex % dutyList.length;
-    const secondIndex = (currentIndex + 1) % dutyList.length;
-    
+    const list = getSavedDutyList();
+    const idx = getCurrentIndex();
     return {
-        first: dutyList[firstIndex],
-        second: dutyList[secondIndex],
-        index: currentIndex
+        first: list[idx % list.length],
+        second: list[(idx + 1) % list.length],
+        startIndex: idx
     };
 }
 
 function displayCurrentDuty() {
-    const dutyPair = getCurrentDutyPair();
-    const displayElement = document.getElementById('todayDutyPair');
+    const pair = getCurrentDutyPair();
     const today = new Date();
     const schoolDays = countSchoolDaysSinceStart(today);
-    
-    let dayInfo = '';
+    const display = document.getElementById('todayDutyPair');
+
     if (schoolDays === 0) {
-        dayInfo = 'Учебный год еще не начался (начинается 3 сентября)';
+        display.innerHTML = `<div style="color:#d32f2f;">Учебный год ещё не начался (начинается 3 сентября)</div>`;
     } else {
-        dayInfo = `Учебный день №${schoolDays} с 3 сентября`;
+        display.innerHTML = `
+            <div>👑 ${pair.first}</div>
+            <div>👑 ${pair.second}</div>
+            <div style="margin-top: 15px; font-size: 0.9em; color: var(--text-light);">
+                Учебный день №${schoolDays} с 3 сентября
+            </div>
+        `;
     }
-    
-    displayElement.innerHTML = `
-        <div>👑 ${dutyPair.first}</div>
-        <div>👑 ${dutyPair.second}</div>
-        <div style="margin-top: 15px; font-size: 0.8em; color: #666;">
-            ${dayInfo}
-        </div>
-    `;
 }
 
 function showFullList() {
-    const dutyList = getSavedDutyList();
+    const list = getSavedDutyList();
     const currentIndex = getCurrentIndex();
-    const listElement = document.getElementById('dutyList');
-    const fullListElement = document.getElementById('fullList');
-    
-    listElement.innerHTML = '';
-    
-    dutyList.forEach((person, index) => {
+    const ol = document.getElementById('dutyList');
+    const fullList = document.getElementById('fullList');
+
+    ol.innerHTML = '';
+
+    for (let i = 0; i < list.length; i++) {
         const li = document.createElement('li');
-        
-        if (index === currentIndex || index === (currentIndex + 1) % dutyList.length) {
+        const isCurrent = i === currentIndex || i === (currentIndex + 1) % list.length;
+
+        if (isCurrent) {
             li.className = 'current-duty';
-            li.innerHTML = `${index + 1}. ${person} ← СЕЙЧАС ДЕЖУРЯТ`;
+            li.textContent = `${i + 1}. ${list[i]} ← СЕЙЧАС ДЕЖУРЯТ`;
         } else {
-            li.innerHTML = `${index + 1}. ${person}`;
+            li.textContent = `${i + 1}. ${list[i]}`;
         }
-        
-        if (index % 2 === 1 && index < dutyList.length - 1) {
+
+        // Добавляем разделитель после каждой пары (после нечётных индексов: 1, 3, 5...)
+        if (i % 2 === 1 && i < list.length - 1) {
             const divider = document.createElement('div');
             divider.className = 'pair-divider';
-            divider.textContent = `——— Пара ${Math.floor(index/2) + 1} ———`;
-            listElement.appendChild(divider);
+            divider.textContent = `——— Пара ${Math.floor(i / 2) + 1} ———`;
+            ol.appendChild(divider);
         }
-        
-        listElement.appendChild(li);
-    });
-    
-    fullListElement.style.display = 'block';
+
+        ol.appendChild(li);
+    }
+
+    fullList.style.display = 'block';
 }
 
 function displayDate() {
@@ -151,9 +152,10 @@ function displayDate() {
     document.getElementById('dateDisplay').textContent = now.toLocaleDateString('ru-RU', options);
 }
 
+// --- localStorage helpers ---
 function getSavedDutyList() {
     const data = localStorage.getItem(DUTY_LIST_KEY);
-    return data ? JSON.parse(data) : initialDutyList;
+    return data ? JSON.parse(data) : [...initialDutyList];
 }
 
 function saveDutyList(list) {
@@ -162,9 +164,9 @@ function saveDutyList(list) {
 
 function getCurrentIndex() {
     const data = localStorage.getItem(CURRENT_INDEX_KEY);
-    return data ? parseInt(JSON.parse(data)) : 0;
+    return data ? parseInt(data, 10) : 0;
 }
 
 function saveCurrentIndex(index) {
-    localStorage.setItem(CURRENT_INDEX_KEY, JSON.stringify(index));
+    localStorage.setItem(CURRENT_INDEX_KEY, index.toString());
 }
